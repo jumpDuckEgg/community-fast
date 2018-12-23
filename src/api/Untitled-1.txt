@@ -1,0 +1,29 @@
+0级目录格式
+
+{
+    path: '/example',//目录路径，需要带斜杆
+    component: Layout,//固定
+    name: 'Example',
+    meta: { title: 'Example', icon: 'example' },
+    
+}
+
+1级菜单格式
+
+{
+    path: 'table',///菜单路径，不需要带斜杆 
+    name: 'Table',
+    component: Table,//需在router文件中先定义好，例如：()=>import('@/view/table')
+    meta: { title: 'Table', icon: 'table' }
+}
+
+2级按钮格式
+
+{
+    method:'post',
+    path:'/delete/people'   
+}
+
+
+兜底
+  { path: '*', redirect: '/404', hidden: true }
