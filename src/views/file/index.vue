@@ -75,13 +75,13 @@
                         <el-input size="small" :disabled="normalFlag" v-model="configForm.qiniuPrefix" placeholder="请输入端点" ></el-input>
                     </el-form-item>
                     <el-form-item label="SecretKey:"  >
-                        <el-input size="small" :disabled="normalFlag" v-model="configForm.SecretKey" placeholder="请输入SecretKey" ></el-input>
+                        <el-input size="small" :disabled="normalFlag" v-model="configForm.qiniuSecretKey" placeholder="请输入SecretKey" ></el-input>
                     </el-form-item>
                 </template>
                 <div class="bottonBox"  v-if="!normalFlag">  
                   <el-form-item >
                     <el-button size="small" type="primary"  @click="saveConfig"  >修改</el-button>
-                    <el-button  size="small"  >取消</el-button>
+                    <el-button  size="small"  @click="cancel">取消</el-button>
                   </el-form-item>
                 </div>
               </el-form>
@@ -167,6 +167,10 @@ export default {
  
         modifyConfig(){
             this.normalFlag = false;
+        },
+        cancel(){
+            this.normalFlag = true;
+
         }
   }
 }

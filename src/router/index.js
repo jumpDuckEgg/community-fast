@@ -6,19 +6,6 @@ import Router from 'vue-router'
 
 Vue.use(Router)
 
-/* Layout */
-// import Layout from '../views/layout/Layout'
-// const Layout = () => import('../views/layout/Layout');
-// const Login  = () => import('@/views/login/index');
-// const Page404 = () => import('@/views/404');
-// const Dashboard = () => import('@/views/dashboard/index');
-// const Table = () => import('@/views/table/index');
-// const Tree = () => import('@/views/tree/index');
-// const User = () => import('@/views/user/index');
-// const Menu = () => import('@/views/menu/index');
-// const Role = () => import('@/views/Role/index');
-// const Form = () => import('@/views/form/index');
-// const FileConfig = () => import('@/views/file/index');
 import component from './component'
 
 /**
@@ -51,27 +38,6 @@ export const constantRouterMap = [
 ]
 
 export const asyncRouterMap = [
-  {
-    path: '/example',
-    component: component.Layout,
-    redirect: '/example/table',
-    name: 'Example',
-    meta: { title: 'Example', icon: 'example' },
-    children: [
-      {
-        path: 'table',
-        name: 'Table',
-        component: component.Table,
-        meta: { title: 'Table', icon: 'table' }
-      },
-      {
-        path: 'tree',
-        name: 'Tree',
-        component: component.Tree,
-        meta: { title: 'Tree', icon: 'tree', roles: ['admin'] }
-      }
-    ]
-  },
   {
     path: '/user',
     component: component.Layout,
@@ -137,87 +103,96 @@ export const asyncRouterMap = [
     ]
   },
   {
-    path: '/form',
+    path: '/neighbourhood',
     component: component.Layout,
+    meta: { title: 'neighbourhood', icon: 'neighbourhood' },
     children: [
       {
         path: 'index',
-        name: 'Form',
-        component: component.Form,
-        meta: { title: 'Form', icon: 'form' }
+        name: 'neighbourhood',
+        component: component.Neighbourhood,
+        meta: { title: 'neighbourhood', icon: 'neighbourhood' }
       }
     ]
   },
-
   {
-    path: '/nested',
+    path: '/ad',
     component: component.Layout,
-    redirect: '/nested/menu1',
-    name: 'Nested',
-    meta: {
-      title: 'Nested',
-      icon: 'nested'
-    },
+    meta: { title: 'ad', icon: 'ad' },
     children: [
       {
-        path: 'menu1',
-        component: () => import('@/views/nested/menu1/index'), // Parent router-view
-        name: 'Menu1',
-        meta: { title: 'Menu1' },
-        children: [  
-          {
-            path: 'menu1-1',
-            component: () => import('@/views/nested/menu1/menu1-1'),
-            name: 'Menu1-1',
-            meta: { title: 'Menu1-1' }
-          },
-          {
-            path: 'menu1-2',
-            component: () => import('@/views/nested/menu1/menu1-2'),
-            name: 'Menu1-2',
-            meta: { title: 'Menu1-2' },
-            children: [
-              {
-                path: 'menu1-2-1',
-                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-1'),
-                name: 'Menu1-2-1',
-                meta: { title: 'Menu1-2-1' }
-              },
-              {
-                path: 'menu1-2-2',
-                component: () => import('@/views/nested/menu1/menu1-2/menu1-2-2'),
-                name: 'Menu1-2-2',
-                meta: { title: 'Menu1-2-2' }
-              }
-            ]
-          },
-          {
-            path: 'menu1-3',
-            component: () => import('@/views/nested/menu1/menu1-3'),
-            name: 'Menu1-3',
-            meta: { title: 'Menu1-3' }
-          }
-        ]
-      },
-      {
-        path: 'menu2',
-        component: () => import('@/views/nested/menu2/index'),
-        meta: { title: 'menu2' }
+        path: 'index',
+        name: 'ad',
+        component: component.Ad,
+        meta: { title: 'ad', icon: 'ad' }
       }
     ]
   },
-
   {
-    path: 'external-link',
+    path: '/adPosition',
     component: component.Layout,
+    meta: { title: 'adPosition', icon: 'position' },
     children: [
       {
-        path: 'https://panjiachen.github.io/vue-element-admin-site/#/',
-        meta: { title: 'External Link', icon: 'link' }
+        path: 'index',
+        name: 'adPosition',
+        component: component.AdPosition,
+        meta: { title: 'adPosition', icon: 'position' }
       }
     ]
   },
-
+  {
+    path: '/board',
+    component: component.Layout,
+    meta: { title: 'board', icon: 'board' },
+    children: [
+      {
+        path: 'index',
+        name: 'board',
+        component: component.Board,
+        meta: { title: 'board', icon: 'board' }
+      }
+    ]
+  },
+  {
+    path: '/measurement',
+    component: component.Layout,
+    meta: { title: 'measurement', icon: 'measurement' },
+    children: [
+      {
+        path: 'index',
+        name: 'measurement',
+        component: component.Measurement,
+        meta: { title: 'measurement', icon: 'measurement' }
+      }
+    ]
+  },
+  {
+    path: '/log',
+    component: component.Layout,
+    meta: { title: 'log', icon: 'log' },
+    children: [
+      {
+        path: 'index',
+        name: 'log',
+        component: component.Log,
+        meta: { title: 'log', icon: 'log' }
+      }
+    ]
+  },
+  {
+    path: '/region',
+    component: component.Layout,
+    meta: { title: 'region', icon: 'region' },
+    children: [
+      {
+        path: 'index',
+        name: 'region',
+        component: component.Region,
+        meta: { title: 'region', icon: 'region' }
+      }
+    ]
+  },
   { path: '*', redirect: '/404', hidden: true }
 ]
 

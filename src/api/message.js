@@ -2,20 +2,20 @@ import request from '@/utils/request'
 
 
 // 查找留言（分页）
-export function findMessage(query){
+export function findMessage(params){
     return request({
         url:'/page/feedback/findPage',
         method:'get',
-        query
+        params
     })
 }
 
 // 查找某个留言
-export function findMessageById(query){
+export function findMessageById(params){
     return request({
         url:'/page/feedback/info',
         method:'get',
-        query
+        params
     })
 }
 

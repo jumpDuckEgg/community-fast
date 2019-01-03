@@ -16,19 +16,19 @@ export function deleteNeighbourhood(data){
     })
 }
 
-export function getNeighbourhood(query){
+export function getNeighbourhood(params){
     return request({
         url:'/page/neighbourhood/findPage',
         method:'get',
-        query
+        params
     })
 }
 
-export function getNeighbourhoodById(query){
+export function getNeighbourhoodById(params){
     return request({
         url:'/page/neighbourhood/info',
         method:'get',
-        query
+        params
     })
 }
 

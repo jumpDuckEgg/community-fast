@@ -107,4 +107,36 @@ export const ICON_JSON = [
         value:'file',
         label:'文件'
     },
+    {
+        value:'neighbourhood',
+        label:'社区'
+    },
+    {
+        value:'message',
+        label:'留言'
+    },
+    {
+        value:'ad',
+        label:'广告'
+    },
+    {
+        value:'position',
+        label:'定位'
+    },
+    {
+        value:'board',
+        label:'公告栏'
+    },
+    {
+        value:'measurement',
+        label:'计量单位'    
+    },
+    {
+        value:'region',
+        label:'区域'    
+    },
+    {
+        value:'category',
+        label:'分类'    
+    }
 ]

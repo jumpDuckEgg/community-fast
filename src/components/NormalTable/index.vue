@@ -6,7 +6,7 @@
         <el-table-column :align="column.textStyle" header-align='center' show-overflow-tooltip :label="column.text" :prop="column.prop" v-for="(column,index) in columns" :key="index" :min-width="column.width" :sortable='column.sort'>
             <template slot-scope="scope">
                 <span style="cursor:pointer" @click="handleClipboard(scope.row[column.field],$event)">
-                    {{ scope.row[column.field] }}
+                    {{ scope.row[column.field] | filterFuns(column.filter) }}
                 </span>
             </template>
         </el-table-column>
@@ -19,6 +19,7 @@
 
 <script>
 import clipboard from "@/utils/clipboard";
+import filters from '@/utils/filter'
 export default {
     name: "normal-table",
     props: {
@@ -60,9 +61,21 @@ export default {
         }
     },
     data() {
-        return {};
+        return {
+        };
     },
-    created() {},
+    created() {
+    },
+    filters:{
+        filterFuns:function(val,filterName){
+            if(filterName){
+                return filters[filterName](val)
+            }else {
+                return val
+            }
+            
+        }
+    },
     methods: {
         handleClipboard(text, event) {
             clipboard(text, event);
@@ -89,7 +102,6 @@ export default {
             this.$emit('rowClick',row)
         }
     },
-    filters: {}
 };
 </script>
 <style lang="scss" scoped>
