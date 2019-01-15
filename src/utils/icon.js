@@ -138,5 +138,29 @@ export const ICON_JSON = [
     {
         value:'category',
         label:'分类'    
+    },
+    {
+        value:'address',
+        label:'地址'    
+    },
+    {
+        value:'shop',
+        label:'商家'    
+    },
+    {
+        value:'goods',
+        label:'商品'    
+    },
+    {
+        value:'goodsShop',
+        label:'商户商品'    
+    },
+    {
+        value:'order',
+        label:'订单'    
+    },
+    {
+        value:'orderDetail',
+        label:'订单详情'    
     }
 ]

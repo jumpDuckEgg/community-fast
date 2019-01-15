@@ -8,6 +8,42 @@ function filterBoardType(val){
     return result;
 }
 
+function filterBoolean(val){
+  let result;
+  if(val == 0 ){
+      result = '否';        
+  }else {
+      result = '是';
+  }
+  return result;
+}
+
+function filterGoodsType(val){
+  let result;
+  if(val == 0 ){
+      result = 'SKU';        
+  }else {
+      result = 'POA';
+  }
+  return result;
+}
+
+function filterStatus(val){
+  let result;
+  if(val == 0 ){
+      result = '待审核';        
+  }
+  if(val == 1 ){
+      result = '审核通过';        
+  }
+  if(val == 2 ){
+    result = '审核失败';        
+  }
+  
+  return result;
+}
+
+
 
 // 过滤成树形数据
 
@@ -77,5 +113,8 @@ function toTreeData (data, attributes) {
 
 export default {
     filterBoardType,
-    toTreeData
+    toTreeData,
+    filterBoolean,
+    filterGoodsType,
+    filterStatus
 }

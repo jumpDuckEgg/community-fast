@@ -86,7 +86,10 @@ export default {
     submitForm(){
         this.$refs.form.validate(valid => {
             if (valid) {
-                let data = this.form;
+                let data = {};
+                for(let key in this.form){
+                    data[key] = this.form[key]
+                }
                 let methods;
                 let msg;
                 this.submitFlag = true;
@@ -139,7 +142,7 @@ export default {
         if(!this.selectDataFliter('请选择一个计量单位进行修改','无法操作多计量单位，请选择一个计量单位')){
             return false;
         }
-        for(var i in this.form){
+        for(var i in this.multipleSelectData[0]){
             this.form[i] = this.multipleSelectData[0][i];
         }
         this.currentFlag = 'modify';

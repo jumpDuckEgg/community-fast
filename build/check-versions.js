@@ -20,11 +20,13 @@ const versionRequirements = [
 ]
 
 if (shell.which('npm')) {
+  console.log('checkNpm')
   versionRequirements.push({
     name: 'npm',
     currentVersion: exec('npm --version'),
     versionRequirement: packageConfig.engines.npm
   })
+  console.log('checkNpmEnd')
 }
 
 module.exports = function() {

@@ -19,11 +19,13 @@ export default {
     props: {
         fileList: {
             type: Array,
-            default: []
+            default: function(){
+                return []
+            }
         },
         limitFlieNumber: {
             type: Number,
-            default: 3
+            default: 1
         },
         buttonFlag: {
             type: Boolean,
@@ -59,11 +61,13 @@ export default {
                     type:'error',
                     message: response.msg
                 })
+            }else {
+                this.$message({
+                    type:'success',
+                    message:'上传成功'
+                })
             }
-            this.$message({
-                type:'success',
-                message:'上传成功'
-            })
+            
             this.uploadFlag = false;
             this.$emit("update:fileList", fileList);
             this.$emit("update:buttonFlag", false);

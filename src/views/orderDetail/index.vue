@@ -2,9 +2,9 @@
   <div class="app-container">
     <el-row class="buttonBox" type="flex" justify="start">
         <el-button-group>
-            <el-button size="mini" type="primary" plain @click="createdNeighbourhood">新增小区</el-button>
-            <el-button size="mini" type="primary" plain @click="modifyNeighbourhood">修改小区</el-button>
-            <el-button size="mini" type="primary" plain @click="deleteNeighbourhood">删除小区</el-button>
+            <el-button size="mini" type="primary" plain @click="createdOrderDetail">新增订单详情</el-button>
+            <el-button size="mini" type="primary" plain @click="modifyOrderDetail">修改订单详情</el-button>
+            <el-button size="mini" type="primary" plain @click="deleteOrderDetail">删除订单详情</el-button>
         </el-button-group>
     </el-row>
      <normalTable :tableMd="20" :columns="columns"  :tableData="tableData" :loading="loading" @multipleSelection="multipleSelection" :currentPage="currentPage" :pageSize="pageSize" :total="total"  @handleSizeChange="handleSizeChange" @handleCurrentChange="handleCurrentChange"></normalTable>
@@ -16,20 +16,37 @@
         >
         <div class="dialog-title">{{dialogTitle}}</div>
         <el-form ref="form"  :model="form" :rules="rules" label-width="120px">
-            <el-form-item label="地址：" prop="address">
-                <el-input size="mini" v-model="form.address" clearable ></el-input>
+            <el-form-item label="商户产品id："  prop="goodsShopId" >
+                <el-select v-model="form.goodsShopId" placeholder="请选择">
+                    <el-option
+                    v-for="item in goodsShopOption"
+                    :key="item.id"
+                    :label="item.id"
+                    :value="item.id">
+                    </el-option>
+                </el-select>
             </el-form-item>
-            <el-form-item label="小区编码：" prop="code">
-                <el-input size="mini" v-model="form.code" clearable ></el-input>
+            <el-form-item label="订单id：" prop="orderId">
+                <el-input size="mini" v-model="form.orderId" clearable ></el-input>
             </el-form-item>
-            <el-form-item label="小区名字：" prop="name">
-                <el-input size="mini" v-model="form.name" clearable ></el-input>
+            <el-form-item label="图片地址:" prop="picUrl">
+              <upload :fileList.sync="fileList" :buttonFlag="buttonFlag" :listType="listType" :limitFlieNumber='limitFlieNumber'></upload>
+            </el-form-item> 
+            <el-form-item label="单价：" prop="price">
+                <el-input size="mini" type="number" v-model="form.price" clearable ></el-input>
             </el-form-item>
-            <el-form-item label="经度："  >
-                <el-input size="mini" v-model="form.x" clearable ></el-input>
+            <el-form-item label="数量：" prop="quantity">
+                <el-input size="mini" type="number" v-model="form.quantity" clearable ></el-input>
             </el-form-item>
-            <el-form-item label="纬度：" >
-                <el-input size="mini" v-model="form.y" clearable ></el-input>
+            <el-form-item label="订单明细状态：" prop="status" >
+                <el-select v-model="form.status" placeholder="请选择">
+                    <el-option
+                    v-for="item in statusOption"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                    </el-option>
+                </el-select>
             </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
@@ -41,9 +58,11 @@
 </template>
 
 <script>
-import { createNeighbourhood,deleteNeighbourhood,getNeighbourhood,getNeighbourhoodById,updateNeighbourhood } from '@/api/neighbourhood'
+import { createOrderDetail,deleteOrderDetail,getOrderDetail,getOrderDetailById,updateOrderDetail } from '@/api/orderDetail'
 import normalTable from '@/components/NormalTable'
 import { _isMobile } from '@/utils/tool'
+import { getGoodsShop } from '@/api/goods-shop'
+import upload from '@/components/UpLoad'
 
 export default {
   data() {
@@ -58,41 +77,50 @@ export default {
         columns: [
             {
                 width: 220,
-                prop: "address",
-                text: "小区地址",
-                field: "address",
+                prop: "goodsShopId",
+                text: "商户产品",
+                field: "goodsShopId",
                 sort: false,
                 textStyle: "left"
             },
             {
                 width: 220,
-                prop: "code",
-                text: "小区编码",
-                field: "code",
+                prop: "orderId",
+                text: "订单id",
+                field: "orderId",
                 sort: false,
                 textStyle: "left"
             },
             {
                 width: 220,
-                prop: "name",
-                text: "小区名字",
-                field: "name",
+                prop: "picUrl",
+                text: "图片地址",
+                field: "picUrl",
+                sort: false,
+                textStyle: "left",
+                type:'picture'
+            },
+            {
+                width: 120,
+                prop: "price",
+                text: "单价",
+                field: "price",
                 sort: false,
                 textStyle: "left"
             },
             {
                 width: 120,
-                prop: "x",
-                text: "经度",
-                field: "x",
+                prop: "quantity",
+                text: "数量",
+                field: "quantity",
                 sort: false,
                 textStyle: "left"
             },
             {
                 width: 120,
-                prop: "y",
-                text: "纬度",
-                field: "y",
+                prop: "status",
+                text: "订单明细状态",
+                field: "status",
                 sort: false,
                 textStyle: "left"
             },
@@ -101,28 +129,67 @@ export default {
         formDialogVisible:false,
         dialogTitle:'新增用户',
         form:{
-            address:'',
-            code:'',
-            name:'',
-            x:'',
-            y:''
+            goodsShopId:'',
+            orderId:'',
+            picUrl:'',
+            price:'',
+            quantity:'',
+            status:''
         },
         rules:{
-            address: [{ required: true, message: '请输入地址', trigger: 'blur' }],
-            code: [{ required: true, message: '请输入小区编码', trigger: 'blur' }],
-            name: [{ required: true, message: '请输入小区名字', trigger: 'blur' }],
+            goodsShopId: [{ required: true, message: '请选择商户产品', trigger: 'blur' }],
+            orderId: [{ required: true, message: '请输入订单id', trigger: 'blur' }],
+            picUrl: [{ required: true, message: '请上传图片', trigger: 'blur' }],
+            price: [{ required: true, message: '请输入单价', trigger: 'blur' }],
+            quantity: [{ required: true, message: '请输入数量', trigger: 'blur' }],
+            status: [{ required: true, message: '请选择状态', trigger: 'blur' }],
         },
         submitFlag:false,
-        currentFlag:''
+        currentFlag:'',
+
+        goodsShopOption:[],
+        statusOption:[
+            {
+                value:'0',
+                label:'正常'
+            },
+            {
+                value:'1',
+                label:'申请退款'
+            },
+            {
+                value:'2',
+                label:'退款成功'
+            }
+        ],
+        // 上传文件组件
+        fileList:[],
+        limitFlieNumber:1,
+        listType:'text',
+        buttonFlag:false,
+        inline:true,
     }
   },
     components : {
-    normalTable
+    normalTable,
+    upload
   },
   created(){
-      this.getNeighbourhoods();
+      this.getOrderDetails();
+      this.getGoodsShops();
       if(_isMobile()){
         this.fullscreen = true;
+    }
+  },
+   watch:{
+    fileList:function (newValue,oldValue) {
+        if(newValue.length!=0){
+          if(!newValue[0].type){
+              this.form.picUrl = newValue[0].response.data.url;
+          }
+        }else {
+          this.form.picUrl = ''
+        }
     }
   },
   methods: {
@@ -137,13 +204,13 @@ export default {
                 let msg;
                 this.submitFlag = true;
                 if(this.currentFlag == 'create'){
-                    methods = createNeighbourhood;
+                    methods = createOrderDetail;
                     msg = '创建成功'
                 }
  
                 if(this.currentFlag == 'modify'){
                     data.id = this.multipleSelectData[0].id;
-                    methods = updateNeighbourhood;
+                    methods = updateOrderDetail;
                     msg = "修改成功";
                 }
                 methods(data).then((res)=>{
@@ -153,10 +220,11 @@ export default {
                     });
                 }).then(async ()=>{
                     this.pageIndex = 1;
-                    await this.getNeighbourhoods();
+                    await this.getOrderDetails();
                     this.$refs.form.resetFields();
                     this.formDialogVisible= false;
                     this.currentFlag = '';
+                    this.fileList = []
                 }).finally(()=>{
                     this.submitFlag = false;
                 })
@@ -167,35 +235,42 @@ export default {
         for(var i in this.form){
             this.form[i] = ''
         }
+        this.fileList = []
     },
     beforeClose(done){
         for(var i in this.form){
             this.form[i] = ''
         }
         this.currentFlag = '';
+        this.fileList = []
         done();
     },
-    createdNeighbourhood(){
+    createdOrderDetail(){
         this.currentFlag = 'create'
         this.formDialogVisible = true;
-        this.dialogTitle = '新增小区';
+        this.dialogTitle = '新增订单详情';
     },
-    modifyNeighbourhood(){
-        if(!this.selectDataFliter('请选择一个小区进行修改','无法操作多小区，请选择一个小区')){
+    modifyOrderDetail(){
+        if(!this.selectDataFliter('请选择一个订单详情进行修改','无法操作多订单详情，请选择一个订单详情')){
             return false;
         }
         for(var i in this.multipleSelectData[0]){
             this.form[i] = this.multipleSelectData[0][i];
         }
+        this.fileList.push({
+          url:this.form.picUrl,
+          type:'finish',
+          name:"图片"
+        });
         this.currentFlag = 'modify';
         this.formDialogVisible = true;
-        this.dialogTitle = '修改小区';
+        this.dialogTitle = '修改订单详情';
     },
-    deleteNeighbourhood(){
-        if(!this.selectDataFliter('请选择一个小区进行修改')){
+    deleteOrderDetail(){
+        if(!this.selectDataFliter('请选择一个订单详情进行修改')){
             return false;
         }
-        this.$confirm("此操作将永久删除该小区信息, 是否继续?", "提示", {
+        this.$confirm("此操作将永久删除该订单详情信息, 是否继续?", "提示", {
             confirmButtonText: "确定",
             cancelButtonText: "取消",
             type: "warning"
@@ -205,7 +280,7 @@ export default {
             this.multipleSelectData.map((value, index) => {
                 ids.push(value.id);
             });
-            deleteNeighbourhood(ids).then(res => {
+            deleteOrderDetail(ids).then(res => {
                 this.$message({
                     type: "success",
                     message: "删除成功!"
@@ -213,7 +288,7 @@ export default {
             })
             .then(() => {
                 this.pageIndex = 1;
-                this.getNeighbourhoods();   
+                this.getOrderDetails();   
             });
         })
         .catch(() => {
@@ -229,26 +304,35 @@ export default {
     handleSizeChange(val){
         this.pageSize = val;
         this.pageIndex = 1;
-        this.getNeighbourhoods();
+        this.getOrderDetails();
     },
     handleCurrentChange(val){
         this.pageIndex = val;
-        this.getNeighbourhoods();
+        this.getOrderDetails();
     },
-      // 获取小区列表
-    getNeighbourhoods(){
+      // 获取订单详情列表
+    getOrderDetails(){
         let params = {
             pageIndex: this.pageIndex,
             pageSize: this.pageSize
         }
         this.loading = true;
-        getNeighbourhood(params).then((res)=>{
+        getOrderDetail(params).then((res)=>{
             let data = res.data
             this.tableData = data.records;
             this.total = Number(data.total);
             this.currentPage = data.current;
         }).finally(()=>{
             this.loading = false;
+        })
+    },
+    getGoodsShops(){
+        let params = {
+            displayAll:1
+        }
+        getGoodsShop(params).then((res)=>{
+            let data = res.data
+            this.goodsShopOption = data.records;
         })
     },
     // 提醒

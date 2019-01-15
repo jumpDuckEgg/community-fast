@@ -7,8 +7,7 @@
             <el-button size="mini" type="primary" plain @click="deleteRegion">删除区域</el-button>
         </el-button-group>
     </el-row>
-    <TreeTable :treeStructure="true" :columns="columns" :dataSource="optionsData"></TreeTable>
-     <normalTable :tableMd="20" :columns="columns"  :tableData="tableData" :loading="loading" @multipleSelection="multipleSelection" :currentPage="currentPage" :pageSize="pageSize" :total="total"  @handleSizeChange="handleSizeChange" @handleCurrentChange="handleCurrentChange"></normalTable>
+    <TreeTable @findChildren="findChildren" :changeFlag.sync="changeFlag" :treeStructure="true" :columns="columns" :dataSource="tableData"  :loading="loading" @multipleSelection="multipleSelection" :currentPage="currentPage" :pageSize="pageSize" :total="total"  @handleSizeChange="handleSizeChange" @handleCurrentChange="handleCurrentChange"></TreeTable>
        <!-- 创建用户 -->
     <el-dialog
         :visible.sync="formDialogVisible"
@@ -40,7 +39,6 @@
 
 <script>
 import { createRegion,deleteRegion,getRegion,getRegionById,updateRegion } from '@/api/region'
-import normalTable from '@/components/NormalTable'
 import { _isMobile } from '@/utils/tool'
 import filters from '@/utils/filter'
 import TreeTable from "@/components/treetable/vue/treegrid.vue";
@@ -72,19 +70,19 @@ export default {
                 sort: false,
                 textStyle: "left"
             },
-            {
-                width: 120,
-                prop: "parentId",
-                text: "父级区域",
-                field: "parentId",
-                sort: false,
-                textStyle: "left"
-            },
+            // {
+            //     width: 120,
+            //     prop: "parentId",
+            //     text: "父级区域",
+            //     field: "parentId",
+            //     sort: false,
+            //     textStyle: "left"
+            // },
  
         ],
         fullscreen:false,
         formDialogVisible:false,
-        dialogTitle:'新增用户',
+        dialogTitle:'新增区域',
         parentIdProps:{
             value:'id',
             label:'name'
@@ -100,11 +98,11 @@ export default {
         },
         submitFlag:false,
         currentFlag:'',
-        optionsData:[]
+        optionsData:[],
+        changeFlag:false
     }
   },
-    components : {
-    normalTable,
+  components : {
     TreeTable
   },
   created(){
@@ -116,6 +114,28 @@ export default {
   },
 
   methods: {
+    setChildrenData(data,id,root){
+        root.forEach((ele)=>{
+            if(ele.id == id){
+                if(data.length>0){
+                    ele.children = data;
+                    ele.childrenFlag = true;
+                }else {
+                    ele.childrenFlag = false;
+                }
+                return false;  
+            }
+            if(ele.children&&ele.children.length>0){
+                this.setChildrenData(data,id,ele.children)
+            }
+        })
+    },
+    async findChildren(id){
+        
+        let childrenData = await this.getRegionsByParentId(id);
+        this.setChildrenData(childrenData,id,this.tableData);
+        this.changeFlag = true;
+    },
     filterData(data){
         // 属性配置信息
         let attributes = {
@@ -136,7 +156,10 @@ export default {
     submitForm(){
         this.$refs.form.validate(valid => {
             if (valid) {
-                let data = this.form;
+                let data = {};
+                for(let key in this.form){
+                    data[key] = this.form[key]
+                }
                 let methods;
                 let msg;
                 this.submitFlag = true;
@@ -159,12 +182,14 @@ export default {
                     this.pageIndex = 1;
                     await this.getRegions();
                     await this.getRegionsToOptions();
+                    
                     this.$refs.form.resetFields();
                     this.formDialogVisible= false;
                     this.currentFlag = '';
                     this.selectedOptions = [];
                 }).finally(()=>{
                     this.submitFlag = false;
+                    
                 })
             }
         })
@@ -192,10 +217,14 @@ export default {
         if(!this.selectDataFliter('请选择一个区域进行修改','无法操作多区域，请选择一个区域')){
             return false;
         }
-        for(var i in this.form){
+        for(var i in this.multipleSelectData[0]){
             this.form[i] = this.multipleSelectData[0][i];
         }
-        this.selectedOptions.push(this.multipleSelectData[0].parentId);
+        let options = this.multipleSelectData[0].root.split(',').reverse();
+        if(options[0] == '0'  &&options.length!=1){
+            options.shift();
+        }
+        this.selectedOptions = options;
         this.currentFlag = 'modify';
         this.formDialogVisible = true;
         this.dialogTitle = '修改区域';
@@ -222,7 +251,8 @@ export default {
             })
             .then(() => {
                 this.pageIndex = 1;
-                this.getRegions();   
+                this.getRegions(); 
+                this.getRegionsToOptions();  
             });
         })
         .catch(() => {
@@ -255,6 +285,7 @@ export default {
         getRegion(params).then((res)=>{
             let data = res.data
             this.tableData = data.records;
+            this.changeFlag = true;
             this.total = Number(data.total);
             this.currentPage = data.current;
         }).finally(()=>{
@@ -278,10 +309,11 @@ export default {
     // 获取某个父级下的子集
     async getRegionsByParentId(id){
         let params = {
-            displayAll:1
+            displayAll:1,
+            parentId:id
         }
         let result = await getRegion(params);
-        let data = result.data;
+        let data = result.data.records;
          return data;
     },
     // 提醒

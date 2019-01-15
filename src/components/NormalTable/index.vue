@@ -2,30 +2,35 @@
   <div>
     <el-col class="table-box" :xs="24" :md="tableMd">
       <el-table v-loading="loading" :data="tableData" stripe size='mini' border @selection-change="handleSelectionChange" @sort-change='tableSort' @row-click="rowClick">
-        <el-table-column type="selection" align="center" width="45"></el-table-column>
+        <el-table-column v-if="opeanPagination" type="selection" align="center" width="45"></el-table-column>
         <el-table-column :align="column.textStyle" header-align='center' show-overflow-tooltip :label="column.text" :prop="column.prop" v-for="(column,index) in columns" :key="index" :min-width="column.width" :sortable='column.sort'>
-            <template slot-scope="scope">
-                <span style="cursor:pointer" @click="handleClipboard(scope.row[column.field],$event)">
-                    {{ scope.row[column.field] | filterFuns(column.filter) }}
-                </span>
+            <template slot-scope="props">
+                <template v-if="column.type!= 'picture'">
+                    <span  style="cursor:pointer" @click="handleClipboard(props.row[column.field],$event)">
+                        {{ props.row[column.field] | filterFuns(column.filter) }}
+                    </span>
+                </template>
+                <template v-else>
+                    <img :src="props.row[column.field]" alt="" width="50px">
+                </template>
             </template>
         </el-table-column>
       </el-table>
-      <el-pagination class="paginationBox" background layout="prev, pager,next,sizes,total" :current-page="currentPage"  :total="total" :page-sizes="[10, 15, 20,25]" :page-size="pageSize" @size-change="handleSizeChange" @current-change="handleCurrentChange">
+      <el-pagination v-if="opeanPagination" class="paginationBox" background layout="prev, pager,next,sizes,total" :current-page="currentPage"  :total="total" :page-sizes="[10, 15, 20,25]" :page-size="pageSize" @size-change="handleSizeChange" @current-change="handleCurrentChange">
         </el-pagination>
     </el-col>
   </div>
 </template>
 
 <script>
-import clipboard from "@/utils/clipboard";
+// import clipboard from "@/utils/clipboard";
 import filters from '@/utils/filter'
 export default {
     name: "normal-table",
     props: {
         tableMd: {
             type: Number,
-            default: '10'
+            default: 24
         },
         loading: {
             type: Boolean,
@@ -58,7 +63,11 @@ export default {
         currentPage:{
             type: [Number,String],
             default: 1
-        }
+        },
+        opeanPagination:{
+            type: Boolean,
+            default: true
+        },
     },
     data() {
         return {
@@ -78,7 +87,7 @@ export default {
     },
     methods: {
         handleClipboard(text, event) {
-            clipboard(text, event);
+            // clipboard(text, event);
         },
         handleSelectionChange(val) {
             this.$emit("multipleSelection",val);

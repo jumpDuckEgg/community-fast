@@ -2,9 +2,9 @@
   <div class="app-container">
     <el-row class="buttonBox" type="flex" justify="start">
         <el-button-group>
-            <el-button size="mini" type="primary" plain @click="createdAd">新增广告</el-button>
-            <el-button size="mini" type="primary" plain @click="modifyAd">修改广告</el-button>
-            <el-button size="mini" type="primary" plain @click="deleteAd">删除广告</el-button>
+            <el-button size="mini" type="primary" plain @click="createdAddress">新增用户住址</el-button>
+            <el-button size="mini" type="primary" plain @click="modifyAddress">修改用户住址</el-button>
+            <el-button size="mini" type="primary" plain @click="deleteAddress">删除用户住址</el-button>
         </el-button-group>
     </el-row>
     <normalTable :tableMd="20" :columns="columns"  :tableData="tableData" :loading="loading" @multipleSelection="multipleSelection" :currentPage="currentPage" :pageSize="pageSize" :total="total"  @handleSizeChange="handleSizeChange" @handleCurrentChange="handleCurrentChange"></normalTable>
@@ -16,44 +16,24 @@
         >
         <div class="dialog-title">{{dialogTitle}}</div>
         <el-form ref="form"  :inline="inline" :model="form" :rules="rules" label-width="120px">
-            <el-form-item label="广告名字：" prop="name">
-                <el-input size="mini" v-model="form.name" clearable ></el-input>
+            <el-form-item label="联系人：" prop="contactUser">
+                <el-input size="mini" v-model="form.contactUser" clearable ></el-input>
             </el-form-item>
-            <el-form-item label="广告内容：" prop="content">
-                <el-input size="mini"  v-model="form.content" clearable ></el-input>
-            </el-form-item>
-            <el-form-item label="广告位ID："  prop="adPositionId" >
-                <el-select size="mini" v-model="form.adPositionId" placeholder="请选择">
+            <el-form-item label="用户id：" >
+                <el-select size="mini" filterable  v-model="form.userId" placeholder="请选择">
                     <el-option 
-                    v-for="item in adPositionOptions"
+                    v-for="item in userOptions"
                     :key="item.id"
-                    :label="item.name"
+                    :label="item.userName"
                     :value="item.id">
                     </el-option>
                 </el-select>
             </el-form-item>
-            <el-form-item label="开始时间" prop="startTime">
-              <el-date-picker size="mini"
-                v-model="form.startTime"
-                type="datetime" value-format="yyyy-MM-dd hh:mm:ss"
-                placeholder="选择开始时间">
-              </el-date-picker>
-            </el-form-item>  
-            <el-form-item label="结束时间" prop="endTime">
-              <el-date-picker size="mini"
-                v-model="form.endTime"
-                type="datetime" value-format="yyyy-MM-dd hh:mm:ss"
-                placeholder="选择结束时间">
-              </el-date-picker>
+            <el-form-item label="联系电话：" prop="contactPhone">
+                <el-input size="mini"  v-model="form.contactPhone" clearable ></el-input>
             </el-form-item>
-            <el-form-item label="上传广告图片" prop="imageUrl">
-              <upload :fileList.sync="fileList" :buttonFlag="buttonFlag" :listType="listType" :limitFlieNumber='limitFlieNumber'></upload>
-            </el-form-item>  
-            <el-form-item label="超链接" >
-                <el-input size="mini" v-model="form.link" clearable ></el-input>
-            </el-form-item>
-            <el-form-item label="广告类型："  prop="mediaType" >
-                <el-select size="mini" v-model="form.mediaType" placeholder="请选择">
+            <el-form-item label="是否默认："  prop="defaultx" >
+                <el-select size="mini" v-model="form.defaultx" placeholder="请选择">
                     <el-option 
                     v-for="item in options"
                     :key="item.value"
@@ -62,31 +42,47 @@
                     </el-option>
                 </el-select>
             </el-form-item>
+            <el-form-item label="小区ID："  prop="neighbourhoodId" >
+                <el-select size="mini" v-model="form.neighbourhoodId" placeholder="请选择">
+                    <el-option 
+                    v-for="item in neighbourhoodPositionOptions"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+             <el-form-item label="区域id："  prop="regionId">
+                <el-cascader
+                    :options="regionPositionOptions"
+                    v-model="selectedOptions"
+                    :props="parentIdProps"  
+                    @change="handleChange">
+                </el-cascader>
+            </el-form-item>
+           
         </el-form>
         <span slot="footer" class="dialog-footer">
-            <el-button type="primary" @click="submitForm()" size="mini" :disabled="buttonFlag" v-loading='submitFlag'>确 定</el-button>
-            <el-button @click="resetForm()" size="mini" type="danger" :disabled="buttonFlag" v-loading='submitFlag'>重 置</el-button>
+            <el-button type="primary" @click="submitForm()" size="mini"   v-loading='submitFlag'>确 定</el-button>
+            <el-button @click="resetForm()" size="mini" type="danger"   v-loading='submitFlag'>重 置</el-button>
         </span>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { createAd,deleteAd,getAd,getAdById,updateAd } from '@/api/ad'
-import { getAdPosition } from '@/api/adPosition'
+import { createAddress,deleteAddress,getAddress,getAddressById,updateAddress } from '@/api/address'
+import { getNeighbourhood } from '@/api/neighbourhood'
+import { getRegion } from '@/api/region'
+import { getUserList } from '@/api/user'
 import normalTable from '@/components/NormalTable'
 import { _isMobile } from '@/utils/tool'
-import upload from '@/components/UpLoad'
+import filters from '@/utils/filter'
 
 export default {
   data() {
     return {
       inline:true,
-      // 上传文件组件
-      fileList:[],
-      limitFlieNumber:1,
-      listType:'text',
-      buttonFlag:false,
       pageIndex:1,//页码
       pageSize:10,//页数
       total:0,//数据总数
@@ -97,111 +93,110 @@ export default {
       columns: [
             {
                 width: 220,
-                prop: "adPositionId",
-                text: "广告位id",
-                field: "adPositionId",
+                prop: "contactUser",
+                text: "联系人",
+                field: "contactUser",
                 sort: false,
                 textStyle: "left"
             },
             {
                 width: 220,
-                prop: "name",
-                text: "名字",
-                field: "name",
+                prop: "address",
+                text: "地址",
+                field: "address",
                 sort: false,
                 textStyle: "left"
             },
             {
                 width: 220,
-                prop: "content",
-                text: "内容",
-                field: "content",
+                prop: "userId",
+                text: "用户id",
+                field: "userId",
+                sort: false,
+                textStyle: "left"
+            },
+            {
+                width: 220,
+                prop: "contactPhone",
+                text: "联系电话",
+                field: "contactPhone",
                 sort: false,
                 textStyle: "left"
             },
             {
                 width: 120,
-                prop: "startTime",
-                text: "开始时间",
-                field: "startTime",
+                prop: "defaultx",
+                text: "是否默认",
+                field: "defaultx",
+                sort: false,
+                textStyle: "left",
+                filter:'filterBoolean'
+            },
+            {
+                width: 120,
+                prop: "neighbourhoodId",
+                text: "小区id",
+                field: "neighbourhoodId",
                 sort: false,
                 textStyle: "left"
             },
             {
                 width: 120,
-                prop: "endTime",
-                text: "结束时间",
-                field: "endTime",
-                sort: false,
-                textStyle: "left"
-            },
-            {
-                width: 120,
-                prop: "imageUrl",
-                text: "图片地址",
-                field: "imageUrl",
-                sort: false,
-                textStyle: "center",
-                type:'picture'
-            },
-            {
-                width: 120,
-                prop: "mediaType",
-                text: "广告类型",
-                field: "mediaType",
+                prop: "regionId",
+                text: "地区id",
+                field: "regionId",
                 sort: false,
                 textStyle: "left"
             }
         ],
         fullscreen:false,
         formDialogVisible:false,
-        dialogTitle:'新增用户',
-        adPositionOptions:[],
+        dialogTitle:'新增用户地址',
+        regionPositionOptions:[],
+        neighbourhoodPositionOptions:[],
+        userOptions:[],
         options:[
             {
-            value:0,
-            label:'图片'
+                value:false,
+                label:'否'
+            },
+            {
+                value:true,
+                label:'是'
             }
         ],
         form:{
-            adPositionId:'',
-            content:'',
-            name:'',
-            startTime:'',
-            endTime:'',
-            imageUrl:'',
-            link:'',
-            mediaType:'',
+            contactUser:'',
+            contactPhone:'',
+            defaultx:'',
+            neighbourhoodId:'',
+            regionId:'',
+            userId:'',
         },
         rules:{
-            adPositionId: [{ required: true, message: '请选择广告位', trigger: 'blur' }],
-            content: [{ required: true, message: '请输入广告位内容', trigger: 'blur' }],
-            name: [{ required: true, message: '请输入名字', trigger: 'blur' }],
-            startTime: [{ required: true, message: '请选择开始时间', trigger: 'blur' }],
-            endTime: [{ required: true, message: '请选择结束时间', trigger: 'blur' }],
-            mediaType: [{ required: true, message: '请选择广告类型', trigger: 'blur' }],
-            imageUrl: [{ required: true, message: '图片地址不能为空', trigger: 'blur' }],
+            contactUser: [{ required: true, message: '请输入联系人', trigger: 'blur' }],
+            contactPhone: [{ required: true, message: '请输入联系电话', trigger: 'blur' }],
+            defaultx: [{ required: true, message: '请选择是否默认', trigger: 'blur' }],
+            neighbourhoodId: [{ required: true, message: '请选择小区id', trigger: 'blur' }],
+            regionId: [{ required: true, message: '请选择地区id', trigger: 'blur' }],
         },
         submitFlag:false,
-        currentFlag:''
+        currentFlag:'',
+        parentIdProps:{
+            value:'id',
+            label:'name'
+        },
+        selectedOptions:[],
     }
   },
   components : {
-    normalTable,
-    upload
+    normalTable
   },
-  watch:{
-    fileList:function (newValue,oldValue) {
-        if(newValue.length!=0){
-          if(!newValue[0].type){
-              this.form.imageUrl = newValue[0].response.data.url;
-          }
-        }else {
-          this.form.imageUrl = ''
-        }
-    }
-  },
+ 
   methods: {
+    handleChange(value) {
+        this.form.regionId = value[value.length-1]
+    },
     submitForm(){
         this.$refs.form.validate(valid => {
             if (valid) {
@@ -213,13 +208,13 @@ export default {
                 let msg;
                 this.submitFlag = true;
                 if(this.currentFlag == 'create'){
-                    methods = createAd;
+                    methods = createAddress;
                     msg = '创建成功'
                 }
 
                 if(this.currentFlag == 'modify'){
                     data.id = this.multipleSelectData[0].id;
-                    methods = updateAd;
+                    methods = updateAddress;
                     msg = "修改成功";
                 }
                 methods(data).then((res)=>{
@@ -229,12 +224,12 @@ export default {
                     });
                 }).then(async ()=>{
                     this.pageIndex = 1;
-                    await this.getAds();
+                    await this.getAddresss();
                     this.$refs.form.resetFields();
                     this.resetForm();
                     this.formDialogVisible= false;
                     this.currentFlag = '';
-                    this.fileList = [];
+                    this.selectedOptions = [];
                 }).finally(()=>{
                     this.submitFlag = false;
                 })
@@ -245,42 +240,38 @@ export default {
         for(var i in this.form){
             this.form[i] = ''
         }
-        this.fileList = []
+        this.selectedOptions = [];
     },
     beforeClose(done){
         for(var i in this.form){
             this.form[i] = ''
         }
+        this.selectedOptions = [];
         this.currentFlag = '';
-        this.fileList = []
         done();
     },
-    createdAd(){
+    createdAddress(){
         this.currentFlag = 'create'
         this.formDialogVisible = true;
-        this.dialogTitle = '新增广告';
+        this.dialogTitle = '新增用户住址';
     },
-    modifyAd(){
-        if(!this.selectDataFliter('请选择一个广告进行修改','无法操作多广告，请选择一个广告')){
+    modifyAddress(){
+        if(!this.selectDataFliter('请选择一个用户住址进行修改','无法操作多用户住址，请选择一个用户住址')){
             return false;
         }
         for(var i in this.form){
             this.form[i] = this.multipleSelectData[0][i];
         }
-        this.fileList.push({
-          url:this.form.imageUrl,
-          type:'finish',
-          name:"图片"
-        });
+        this.selectedOptions.push(this.multipleSelectData[0].regionId);
         this.currentFlag = 'modify';
         this.formDialogVisible = true;
-        this.dialogTitle = '修改广告';
+        this.dialogTitle = '修改用户住址';
     },
-    deleteAd(){
-         if(!this.selectDataFliter('请选择一个广告进行修改')){
+    deleteAddress(){
+         if(!this.selectDataFliter('请选择一个用户住址进行修改')){
             return false;
         }
-        this.$confirm("此操作将永久删除该广告信息, 是否继续?", "提示", {
+        this.$confirm("此操作将永久删除该用户住址信息, 是否继续?", "提示", {
             confirmButtonText: "确定",
             cancelButtonText: "取消",
             type: "warning"
@@ -290,7 +281,7 @@ export default {
             this.multipleSelectData.map((value, index) => {
                 ids.push(value.id);
             });
-            deleteAd(ids).then(res => {
+            deleteAddress(ids).then(res => {
                 this.$message({
                     type: "success",
                     message: "删除成功!"
@@ -298,7 +289,7 @@ export default {
             })
             .then(() => {
                 this.pageIndex = 1;
-                this.getAds();   
+                this.getAddresss();   
             });
         })
         .catch(() => {
@@ -314,19 +305,19 @@ export default {
     handleSizeChange(val){
         this.pageSize = val;
         this.pageIndex = 1;
-        this.getAds();
+        this.getAddresss();
     },
     handleCurrentChange(val){
         this.pageIndex = val;
-        this.getAds();
+        this.getAddresss();
     },
-    getAds(){
+    getAddresss(){
         let params = {
             pageIndex: this.pageIndex,
             pageSize: this.pageSize
         }
         this.loading = true;
-        getAd(params).then((res)=>{
+        getAddress(params).then((res)=>{
             let data = res.data
             this.tableData = data.records;
             this.total = Number(data.total);
@@ -335,14 +326,37 @@ export default {
             this.loading = false;
         })
     },
-    getAdPositions(){
+    getRegions(){
         let params = {
             displayAll:1
         }
-        getAdPosition(params).then((res)=>{
+        getRegion(params).then((res)=>{
             let data = res.data
-            this.adPositionOptions = data.records;
+            // 属性配置信息
+            let attributes = {
+                id: 'id',
+                parentId: 'parentId',
+            };
+            this.regionPositionOptions = filters.toTreeData(data.records,attributes);
         }) 
+    },
+    getNeighbourhoods(){
+        let params = {
+            displayAll:1
+        }
+        getNeighbourhood(params).then((res)=>{
+            let data = res.data
+            this.neighbourhoodPositionOptions = data.records;
+        }) 
+    },
+    getUsers(){
+        let params = {
+            displayAll:1
+        }
+        getUserList(params).then((res)=>{
+            let data = res.data
+            this.userOptions = data.records;
+        })
     },
     // 提醒
     selectDataFliter(noSelectMsg,overSelectMsg){
@@ -364,8 +378,10 @@ export default {
     },
   },
   created(){
-      this.getAds();
-      this.getAdPositions();
+      this.getAddresss();
+      this.getRegions();
+      this.getNeighbourhoods();
+      this.getUsers();
       if(_isMobile()){
         this.fullscreen = true;
     }

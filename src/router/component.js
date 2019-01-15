@@ -14,7 +14,13 @@ const Board = () => import('@/views/board/index');
 const Measurement = () => import('@/views/measurement/index');
 const Log = () => import('@/views/log/index');
 const Region = () => import('@/views/region/index');
-const Category = () => import('@/views/region/index');
+const Category = () => import('@/views/category/index');
+const Address = () => import('@/views/address/index');
+const Shop = () => import('@/views/shop/index');
+const Goods = () => import('@/views/goods/index');
+const GoodsShop = () => import('@/views/goodsShop/index');
+const Order = () => import('@/views/order/index');
+const OrderDetail = () => import('@/views/orderDetail/index');
 module.exports = {
     Layout,
     Login,
@@ -32,5 +38,11 @@ module.exports = {
     Measurement,
     Log,
     Region,
-    Category
+    Category,
+    Address,
+    Shop,
+    Goods,
+    GoodsShop,
+    Order,
+    OrderDetail
 }

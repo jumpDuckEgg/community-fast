@@ -176,7 +176,7 @@ export default {
       normalFlag:true,
       parentFlag:true,
       componentFlag:true, 
-      expandAll:true,
+      expandAll:false,
       selectData:{},
       highlight:true,
       menuList:[],

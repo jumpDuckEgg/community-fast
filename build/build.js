@@ -13,10 +13,11 @@ const webpackConfig = require('./webpack.prod.conf')
 
 const spinner = ora('building for production...')
 spinner.start()
-
+console.log("start")
 rm(path.join(config.build.assetsRoot, config.build.assetsSubDirectory), err => {
   if (err) throw err
   webpack(webpackConfig, (err, stats) => {
+    console.log("stop")
     spinner.stop()
     if (err) throw err
     process.stdout.write(
@@ -28,7 +29,7 @@ rm(path.join(config.build.assetsRoot, config.build.assetsSubDirectory), err => {
         chunkModules: false
       }) + '\n\n'
     )
-
+    console.log(stats.hasErrors())
     if (stats.hasErrors()) {
       console.log(chalk.red('  Build failed with errors.\n'))
       process.exit(1)

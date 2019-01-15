@@ -1,23 +1,28 @@
 <template>
     <div>
-        <el-table v-loading='loading' :data="data" border :row-style="showTr" stripe size='mini' border @selection-change="handleSelectionChange" @sort-change='tableSort'>
+        <el-col class="table-box" :xs="24" :md="tableMd">
+        <el-table v-loading='loading' :data="data" border  :row-style="showTr" stripe size='mini'  @selection-change="handleSelectionChange" @sort-change='tableSort'>
             <el-table-column type="selection" align="center" width="45"></el-table-column>
-            <el-table-column :label="column.text" v-for="(column,index) in columns" :key="index" :prop="column.prop" :sortable='column.sort' :width="column.width?column.width:''" header-align='center' :align="column.textAlign" show-overflow-tooltip>
+            <el-table-column :label="column.text" v-for="(column,index) in columns" :key="index" :prop="column.prop" :sortable='column.sort' :min-width="column.width?column.width:''" header-align='center' :align="column.textAlign" show-overflow-tooltip>
                 <template slot-scope="props">
                     <span v-if="spaceIconShow(index)" v-for="(space, levelIndex) in props.row._level" :key='levelIndex' class="ms-tree-space"></span>
                     <template v-if="toggleIconShow(index,props.row)">
-                        <i v-if="!props.row._expanded" class="el-icon-arrow-right" aria-hidden="true" @click="toggle(props.$index)"></i>
-                        <i v-if="props.row._expanded" class="el-icon-arrow-down" aria-hidden="true" @click="toggle(props.$index)"></i>
+                        <i v-if="!props.row._expanded" class="el-icon-arrow-right" aria-hidden="true" @click="toggle(props.row,props.$index)"></i>
+                        <i v-if="props.row._expanded" class="el-icon-arrow-down" aria-hidden="true" @click="toggle(props.row,props.$index)"></i>
                     </template>
                     <span v-else-if="index===0" class="ms-tree-space"></span>
-                        {{ props.row[column.field] }}
+                        {{ props.row[column.field] | filterFuns(column.filter) }}
                 </template>
             </el-table-column>
         </el-table>
+        <el-pagination class="paginationBox" background layout="prev, pager,next,sizes,total" :current-page="currentPage"  :total="total" :page-sizes="[10, 15, 20,25]" :page-size="pageSize" @size-change="handleSizeChange" @current-change="handleCurrentChange">
+        </el-pagination>
+        </el-col>
     </div>
 </template>
 <script>
 import Utils from "../utils/index.js";
+import filters from '@/utils/filter'
 //  import Vue from 'vue'
 export default {
     name: "tree-grid",
@@ -34,6 +39,10 @@ export default {
             default: function() {
                 return false;
             }
+        },
+        tableMd: {
+            type: Number,
+            default: 20
         },
         // 这是相应的字段展示
         columns: {
@@ -55,29 +64,76 @@ export default {
             default: function() {
                 return false;
             }
+        },
+        // 数据条数
+        total:{
+            type: [Number,String],
+            default: 0
+        },
+        // 页数
+        pageSize:{
+            type: [Number,String],
+            default: 10
+        },
+        currentPage:{
+            type: [Number,String],
+            default: 1
+        },
+        changeFlag:{
+            type: Boolean,
+            default: false
+        }
+    },
+    filters:{
+        filterFuns:function(val,filterName){
+            if(filterName){
+                return filters[filterName](val)
+            }else {
+                return val
+            }
+            
         }
     },
     data() {
-        return {};
+        return {
+            data:[],
+            firstFlag:true
+        };
     },
-    computed: {
-        // 格式化数据源
-        data: function() {
-            let me = this;
-            if (me.treeStructure) {
-                let data = Utils.MSDataTransfer.treeToArray(
-                    me.dataSource,
-                    null,
-                    null,
-                    me.defaultExpandAll
-                );
-                return data;
+    watch: {
+        dataSource:function(newValue,oldValue){
+            if(this.firstFlag){
+                let me = this;
+                if (me.treeStructure) {
+                    let data = Utils.MSDataTransfer.treeToArray(
+                        me.dataSource,
+                        null,
+                        null,
+                        me.defaultExpandAll
+                    );
+                    this.data =  data;
+                }else {
+                    this.data = this.dataSource;
+                }
+                this.firstFlag = false;
             }
-            return me.dataSource;
-        }
-    },
-    filters: {
-        
+ 
+        },
+        changeFlag:function(newValue,oldValue){
+           if(newValue === true){
+                let me = this;
+                if (me.treeStructure) {
+                    let data = Utils.MSDataTransfer.treeToArray(
+                        me.dataSource,
+                        null,
+                        null,
+                        me.defaultExpandAll
+                    );
+                    this.data = data;
+                }
+                this.$emit("update:changeFlag", false);
+           }
+        },
     },
     methods: {
         // 显示行
@@ -92,10 +148,15 @@ export default {
             return show ? "" : "display:none;";
         },
         // 展开下级
-        toggle: function(trIndex) {
+        toggle: function(row,trIndex) {
+            
             // console.log("我点击了" + trIndex);
             let me = this;
             let record = me.data[trIndex];
+            if(record.childrenFlag === undefined){
+                
+                this.$emit("findChildren",row.id);
+            }
             // console.log("record:", record);
             record._expanded = !record._expanded;
         },
@@ -113,8 +174,7 @@ export default {
             if (
                 me.treeStructure &&
                 index === 0 &&
-                record.children &&
-                record.children.length > 0
+                record._hasChildren == 'has'
             ) {
                 return true;
             }
@@ -135,7 +195,13 @@ export default {
         },
         showFileList(data) {
             this.$emit("fileList", data);
-        }
+        },
+        handleSizeChange(val){
+            this.$emit("handleSizeChange", val);
+        },
+        handleCurrentChange(val){
+            this.$emit("handleCurrentChange", val);
+        },
     }
 };
 </script>
@@ -156,5 +222,9 @@ export default {
 }
 table td {
     line-height: 26px;
+}
+.paginationBox {
+    text-align: center;
+    margin-top: 20px;
 }
 </style>

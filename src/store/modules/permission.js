@@ -53,7 +53,10 @@ const permission = {
           // console.log(filterRouter(data));
           let accessedRouters
           accessedRouters = asyncRouterMap
-          // accessedRouters = filterRouter(data)
+          accessedRouters = filterRouter(data)
+          accessedRouters.push(
+            { path: '*', redirect: '/404', hidden: true }
+          )
           commit('SET_ROUTERS', accessedRouters)
           resolve()
         }).catch(error => {
